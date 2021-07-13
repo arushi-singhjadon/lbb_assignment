@@ -1,18 +1,11 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { GoogleMap, useLoadScript, Marker } from "@react-google-maps/api";
-import usePlacesAutocomplete, { getGeocode, getLatLng, } from "use-places-autocomplete";
-import { Combobox, ComboboxInput, ComboboxPopover, ComboboxList, ComboboxOption, } from "@reach/combobox";
+
 import axios from "axios";
 import _ from "lodash";
-import SwiperCore, { A11y, Navigation, Pagination, Scrollbar } from 'swiper';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import "@reach/combobox/styles.css";
-import 'swiper/swiper.min.css';
-import 'swiper/components/navigation/navigation.min.css';
-import 'swiper/components/pagination/pagination.min.css'
 
-SwiperCore.use([Navigation, Pagination, Scrollbar, A11y]);
-
+import Search from "./Search";
+import ImageContainer from "./ImageContainer";
 
 const libraries = ["places"];
 
@@ -130,110 +123,4 @@ export default function App() {
             }
         </div>
     );
-}
-
-
-
-function Search({ panTo, setImagesArray }) {
-    const {
-        ready,
-        value,
-        suggestions: { status, data },
-        setValue,
-        clearSuggestions,
-    } = usePlacesAutocomplete();
-
-
-    const handleInput = (e) => {
-        setValue(e.target.value);
-    };
-
-    const handleSelect = async (address) => {
-        setValue(address, false);
-        clearSuggestions();
-
-        try {
-            const results = await getGeocode({ address });
-            const { lat, lng } = await getLatLng(results[0]);
-            panTo({ lat, lng });
-
-        } catch (error) {
-            console.log(" Error: ", error);
-        }
-    };
-
-    return (
-
-        <div className="search">
-            <Combobox onSelect={handleSelect}>
-                <ComboboxInput
-                    value={value}
-                    onChange={handleInput}
-                    disabled={!ready}
-                    placeholder="Search your location"
-                />
-                <ComboboxPopover>
-                    <ComboboxList>
-                        {status === "OK" &&
-                            data.map(({ id, description }) => (
-                                <ComboboxOption key={id + description} value={description} />
-                            ))}
-                    </ComboboxList>
-                </ComboboxPopover>
-            </Combobox>
-        </div>
-    );
-}
-
-function ImageContainer({ imagesArray }) {
-    return (
-        <div className={'insight-container'}>
-
-
-            <Swiper
-                init={false}
-                spaceBetween={20}
-                navigation
-                slidesPerView={4}
-                slidesPerGroup={4}
-                pagination={{ clickable: true }}
-
-            >
-
-                {
-                    imagesArray.map((imageRef, counter) => {
-                        return (
-                            <SwiperSlide key={'slide-' + counter}>
-
-                                <Item imageRef={imageRef}></Item>
-
-                            </SwiperSlide>
-                        )
-
-                    })
-                }
-
-
-            </Swiper>
-
-        </div>
-
-    )
-}
-
-function Item({ imageRef }) {
-    let src = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=" + imageRef + "&key=" + process.env.REACT_APP_GOOGLE_API_KEY;
-
-    var divStyle = {
-        backgroundImage: 'url(' + src + ')',
-        height: '300px',
-        backgroundRepeat: 'no-repeat',
-        backgroundSize: 'cover',
-
-
-    }
-    return (
-        <div style={divStyle}>
-        </div>
-    )
 }
